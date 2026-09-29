@@ -1,0 +1,11 @@
+{% macro type_badge(t) -%}
+<span class="badge {{ 'badge-in' if t in INBOUND else 'badge-out' }} badge-{{ t|lower }}">{{ MOVEMENT_TYPES[t][0] }}</span>
+{%- endmacro %}
+
+{% macro signed_qty(row) -%}
+<span class="{{ 'qty-in' if row.movement_type in INBOUND else 'qty-out' }}">{{ '+' if row.movement_type in INBOUND else '−' }}{{ row.quantity }}</span>
+{%- endmacro %}
+
+{% macro party_link(row) -%}
+{% if row.party_id %}<span class="muted">{{ 'from' if row.movement_type in INBOUND else 'to' }}</span> <a href="{{ url_for('main.party_detail', party_id=row.party_id) }}">{{ row.party_name }}</a>{% else %}<span class="muted">—</span>{% endif %}
+{%- endmacro %}

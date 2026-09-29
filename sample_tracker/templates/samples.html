@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Samples{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Samples inventory</h1>
+  <div>
+    <a class="btn" href="{{ url_for('main.samples', q=q, stock=stock, format='csv') }}">Export CSV</a>
+    <a class="btn" href="{{ url_for('main.sample_new') }}">New sample record</a>
+  </div>
+</div>
+<form class="filters card" method="get">
+  <input name="q" value="{{ q }}" placeholder="Search code, name, category, part #, location">
+  <select name="stock">
+    <option value="">All</option>
+    <option value="in" {% if stock == 'in' %}selected{% endif %}>In stock</option>
+    <option value="out" {% if stock == 'out' %}selected{% endif %}>None on hand</option>
+  </select>
+  <button class="btn" type="submit">Filter</button>
+</form>
+<section class="card scroll">
+<table>
+  <thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Part #</th><th>Location</th><th class="num">Received</th><th class="num">Out</th><th class="num">On hand</th><th>Last activity</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td><a href="{{ url_for('main.sample_detail', sample_id=r.id) }}">{{ r.code }}</a></td>
+      <td>{{ r.name }}</td><td>{{ r.category or '' }}</td><td>{{ r.part_number or '' }}</td><td>{{ r.storage_location or '' }}</td>
+      <td class="num qty-in">{{ r.qty_in }}</td><td class="num qty-out">{{ r.qty_out }}</td>
+      <td class="num"><strong>{{ r.on_hand }}</strong> <span class="muted">{{ r.unit }}</span></td>
+      <td>{{ r.last_activity or '' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="muted">No samples found.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</section>
+{% endblock %}

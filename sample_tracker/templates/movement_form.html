@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Record movement{% endblock %}
+{% block content %}
+<h1>Record a movement</h1>
+<p class="muted">Use this to send samples out, redirect them, log returns, consumption, or stock adjustments.</p>
+<form method="post" class="card form">
+  <div class="row">
+    <label>Type *
+      <select name="movement_type" required>
+        {% for key, (label, direction) in MOVEMENT_TYPES.items() %}
+          <option value="{{ key }}" {% if form.get('movement_type') == key %}selected{% endif %}>{{ label }} ({{ 'in' if direction > 0 else 'out' }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Sample *
+      <select name="sample_id" required onchange="location.search='?movement_type='+this.form.movement_type.value+'&sample_id='+this.value">
+        <option value="">— select —</option>
+        {% for s in samples %}<option value="{{ s.id }}" {% if form.get('sample_id')|string == s.id|string %}selected{% endif %}>{{ s.code }} — {{ s.name }} ({{ s.on_hand }} {{ s.unit }} on hand)</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Quantity * <input type="number" min="1" name="quantity" value="{{ form.get('quantity', '') }}" required></label>
+    <label>Date * <input type="date" name="movement_date" value="{{ form.get('movement_date', today) }}" required></label>
+  </div>
+  <div class="row">
+    <label>From / to (vendor, customer…)
+      {% with field='party_id', required=False %}{% include "_party_select.html" %}{% endwith %}
+      <small>Required for received, returned, sent and redirected. <a href="{{ url_for('main.party_new', next=request.full_path) }}">+ add new</a></small>
+    </label>
+    <label>Reference (PO / request #) <input name="reference" value="{{ form.get('reference', '') }}"></label>
+  </div>
+  <div class="row">
+    <label>Carrier <input name="carrier" value="{{ form.get('carrier', '') }}"></label>
+    <label>Tracking # <input name="tracking_number" value="{{ form.get('tracking_number', '') }}"></label>
+  </div>
+  {% if open_receipts %}
+  <label>Redirect of receipt (optional — links this redirect to where the samples came from)
+    <select name="source_movement_id">
+      <option value="">— not linked —</option>
+      {% for r in open_receipts %}<option value="{{ r.id }}" {% if form.get('source_movement_id')|string == r.id|string %}selected{% endif %}>#{{ r.id }} · {{ r.movement_date }} · {{ r.quantity }} from {{ r.party_name }}</option>{% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <label>Notes <textarea name="notes" rows="2">{{ form.get('notes', '') }}</textarea></label>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}

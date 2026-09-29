@@ -1,0 +1,24 @@
+{% from "_macros.html" import type_badge, signed_qty, party_link %}
+<table class="movements">
+  <thead><tr><th>#</th><th>Date</th><th>Type</th>{% if show_sample %}<th>Sample</th>{% endif %}<th class="num">Qty</th>{% if show_balance %}<th class="num">Balance</th>{% endif %}<th>Party</th><th>Reference</th><th>Shipping</th><th>By</th><th>Notes</th></tr></thead>
+  <tbody>
+  {% for item in rows %}
+    {% set r = item[0] if show_balance else item %}
+    <tr class="{{ 'voided' if r.voided }}">
+      <td class="muted">{{ r.id }}</td>
+      <td>{{ r.movement_date }}</td>
+      <td>{{ type_badge(r.movement_type) }}{% if r.voided %} <span class="badge badge-void" title="{{ r.void_reason }}">VOID</span>{% endif %}</td>
+      {% if show_sample %}<td><a href="{{ url_for('main.sample_detail', sample_id=r.sample_id) }}">{{ r.sample_code }}</a> <span class="muted">{{ r.sample_name }}</span></td>{% endif %}
+      <td class="num">{{ signed_qty(r) }} <span class="muted">{{ r.unit }}</span></td>
+      {% if show_balance %}<td class="num">{{ item[1] }}</td>{% endif %}
+      <td>{{ party_link(r) }}{% if r.source_movement_id %}<div class="muted small">↳ of receipt #{{ r.source_movement_id }} from {{ r.source_party }} ({{ r.source_date }})</div>{% endif %}</td>
+      <td>{{ r.reference or '' }}</td>
+      <td>{{ r.carrier or '' }}{% if r.tracking_number %}<div class="small">{{ r.tracking_number }}</div>{% endif %}</td>
+      <td>{{ r.handled_by }}</td>
+      <td class="small">{{ r.notes or '' }}{% if r.voided %}<div class="muted">Voided by {{ r.voided_by }} on {{ r.voided_at }}: {{ r.void_reason }}</div>{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="11" class="muted">No entries.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>

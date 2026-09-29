@@ -1,0 +1,21 @@
+<table class="audit">
+  <thead><tr><th>When (UTC)</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    {% set d = a.details|fromjson %}
+    <tr>
+      <td class="nowrap">{{ a.ts }}</td><td>{{ a.user_name }}</td>
+      <td class="nowrap">{{ a.action }} {{ a.entity }} #{{ a.entity_id }}</td>
+      <td class="small">
+        {% if a.action == 'update' %}
+          {% for k, v in d.items() %}<div><strong>{{ k }}</strong>: {{ v['from'] if v['from'] is not none else '∅' }} → {{ v['to'] if v['to'] is not none else '∅' }}</div>{% endfor %}
+        {% else %}
+          {% for k, v in d.items() if v is not none %}<span class="kv"><strong>{{ k }}</strong>: {{ v }}</span> {% endfor %}
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">No audit entries.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>

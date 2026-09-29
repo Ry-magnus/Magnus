@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Add vendor / customer' if is_new else 'Edit ' ~ party.get('name') }}{% endblock %}
+{% block content %}
+<h1>{{ 'Add vendor / customer' if is_new else 'Edit ' ~ party.get('name') }}</h1>
+<form method="post" class="card form">
+  <div class="row">
+    <label>Name * <input name="name" value="{{ party.get('name') or '' }}" required></label>
+    <label>Type *
+      <select name="party_type" required>
+        {% for t in PARTY_TYPES %}<option value="{{ t }}" {% if party.get('party_type') == t %}selected{% endif %}>{{ t|capitalize }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Contact person <input name="contact_person" value="{{ party.get('contact_person') or '' }}"></label>
+    <label>Email <input type="email" name="email" value="{{ party.get('email') or '' }}"></label>
+  </div>
+  <div class="row">
+    <label>Phone <input name="phone" value="{{ party.get('phone') or '' }}"></label>
+    <label>Address <input name="address" value="{{ party.get('address') or '' }}"></label>
+  </div>
+  <label>Notes <textarea name="notes" rows="2">{{ party.get('notes') or '' }}</textarea></label>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}

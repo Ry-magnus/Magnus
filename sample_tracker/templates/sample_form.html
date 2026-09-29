@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'New sample' if is_new else 'Edit ' ~ sample.code }}{% endblock %}
+{% block content %}
+<h1>{{ 'New sample record' if is_new else 'Edit ' ~ sample.code }}</h1>
+<form method="post" class="card form">
+  <div class="row">
+    {% if is_new %}<label>Sample code <input name="code" value="{{ sample.get('code', '') }}" placeholder="{{ next_code }} (auto)"></label>{% endif %}
+    <label>Name / description * <input name="name" value="{{ sample.get('name') or '' }}" required></label>
+  </div>
+  <div class="row">
+    <label>Category <input name="category" value="{{ sample.get('category') or '' }}"></label>
+    <label>Vendor part / SKU # <input name="part_number" value="{{ sample.get('part_number') or '' }}"></label>
+  </div>
+  <div class="row">
+    <label>Unit <input name="unit" value="{{ sample.get('unit') or 'pcs' }}"></label>
+    <label>Storage location <input name="storage_location" value="{{ sample.get('storage_location') or '' }}"></label>
+  </div>
+  <label>Notes <textarea name="description" rows="3">{{ sample.get('description') or '' }}</textarea></label>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+{% endblock %}

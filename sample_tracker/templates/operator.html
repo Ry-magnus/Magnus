@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Who are you?{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>Who is recording?</h1>
+  <p class="muted">Your name is stamped on every entry and in the audit trail.</p>
+  <form method="post">
+    <label>Your name <input name="name" value="{{ operator or '' }}" required autofocus></label>
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+</div>
+{% endblock %}
