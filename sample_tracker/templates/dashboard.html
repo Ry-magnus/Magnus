@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import type_badge, signed_qty, party_link %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="stats">
+  <div class="stat"><div class="stat-label">Units on hand</div><div class="stat-value">{{ stats.on_hand }}</div><div class="muted">across {{ stats.samples }} sample records</div></div>
+  <div class="stat"><div class="stat-label">Received (all time)</div><div class="stat-value qty-in">{{ stats.total_in }}</div><div class="muted">{{ stats.month_in }} this month</div></div>
+  <div class="stat"><div class="stat-label">Sent / redirected / used</div><div class="stat-value qty-out">{{ stats.total_out }}</div><div class="muted">{{ stats.month_out }} this month</div></div>
+  <div class="stat"><div class="stat-label">Vendors &amp; customers</div><div class="stat-value">{{ stats.parties }}</div><div class="muted"><a href="{{ url_for('main.party_new') }}">add one</a></div></div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Top sources</h2>
+    {% if top_sources %}<table>{% for p in top_sources %}<tr><td><a href="{{ url_for('main.party_detail', party_id=p.id) }}">{{ p.name }}</a></td><td class="num qty-in">{{ p.qty }}</td></tr>{% endfor %}</table>
+    {% else %}<p class="muted">Nothing received yet.</p>{% endif %}
+  </section>
+  <section class="card">
+    <h2>Top destinations</h2>
+    {% if top_destinations %}<table>{% for p in top_destinations %}<tr><td><a href="{{ url_for('main.party_detail', party_id=p.id) }}">{{ p.name }}</a></td><td class="num qty-out">{{ p.qty }}</td></tr>{% endfor %}</table>
+    {% else %}<p class="muted">Nothing sent out yet.</p>{% endif %}
+  </section>
+</div>
+
+<section class="card scroll">
+  <div class="card-head"><h2>Recent activity</h2><a href="{{ url_for('main.movements') }}">All movements →</a></div>
+  {% if recent %}
+  <table>
+    <thead><tr><th>Date</th><th>Type</th><th>Sample</th><th class="num">Qty</th><th>Party</th><th>Ref / Tracking</th><th>By</th></tr></thead>
+    <tbody>
+    {% for r in recent %}
+      <tr>
+        <td class="nowrap">{{ r.movement_date }}</td><td>{{ type_badge(r.movement_type) }}</td>
+        <td><a href="{{ url_for('main.sample_detail', sample_id=r.sample_id) }}">{{ r.sample_code }}</a> {{ r.sample_name }}</td>
+        <td class="num">{{ signed_qty(r) }}</td><td>{{ party_link(r) }}</td>
+        <td>{{ [r.reference, r.tracking_number]|select|join(' · ') }}</td><td>{{ r.handled_by }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No activity yet. Start by <a href="{{ url_for('main.receive') }}">receiving a sample</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

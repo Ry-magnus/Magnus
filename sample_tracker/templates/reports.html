@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Reports</h1>
+  <a class="btn" href="{{ url_for('main.reports', date_from=date_from, date_to=date_to, format='csv') }}">Export party summary CSV</a>
+</div>
+<form class="filters card" method="get">
+  <label class="inline">From <input type="date" name="date_from" value="{{ date_from }}"></label>
+  <label class="inline">To <input type="date" name="date_to" value="{{ date_to }}"></label>
+  <button class="btn" type="submit">Update</button>
+</form>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>By movement type</h2>
+    <table>
+      <thead><tr><th>Type</th><th class="num">Entries</th><th class="num">Units</th></tr></thead>
+      <tbody>
+      {% for r in by_type %}<tr><td>{{ MOVEMENT_TYPES[r.movement_type][0] }}</td><td class="num">{{ r.entries }}</td><td class="num {{ 'qty-in' if r.movement_type in INBOUND else 'qty-out' }}">{{ r.qty }}</td></tr>
+      {% else %}<tr><td colspan="3" class="muted">No activity in this period.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="card">
+    <h2>By month</h2>
+    {% set peak = (by_month|map(attribute='qty_in')|list + by_month|map(attribute='qty_out')|list + [1])|max %}
+    <table>
+      <thead><tr><th>Month</th><th class="num">In</th><th class="num">Out</th><th></th></tr></thead>
+      <tbody>
+      {% for r in by_month %}
+        <tr><td>{{ r.month }}</td><td class="num qty-in">{{ r.qty_in }}</td><td class="num qty-out">{{ r.qty_out }}</td>
+          <td class="bars"><div class="bar bar-in" style="width: {{ (r.qty_in / peak * 100)|round }}%"></div><div class="bar bar-out" style="width: {{ (r.qty_out / peak * 100)|round }}%"></div></td></tr>
+      {% else %}<tr><td colspan="4" class="muted">No activity in this period.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<section class="card scroll">
+  <h2>By vendor / customer</h2>
+  <table>
+    <thead><tr><th>Party</th><th>Type</th><th class="num">Received from</th><th class="num">Returned by</th><th class="num">Sent to</th><th class="num">Redirected to</th></tr></thead>
+    <tbody>
+    {% for r in by_party %}
+      <tr><td><a href="{{ url_for('main.party_detail', party_id=r.id) }}">{{ r.name }}</a></td><td>{{ r.party_type }}</td>
+        <td class="num qty-in">{{ r.received }}</td><td class="num qty-in">{{ r.returned }}</td><td class="num qty-out">{{ r.sent }}</td><td class="num qty-out">{{ r.redirected }}</td></tr>
+    {% else %}<tr><td colspan="6" class="muted">No activity in this period.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

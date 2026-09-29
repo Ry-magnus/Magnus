@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Receive samples{% endblock %}
+{% block content %}
+<h1>Receive samples</h1>
+<p class="muted">Log samples arriving at the office. Pick an existing sample record or create a new one. If the samples are being passed straight on to someone else, fill in the <em>Redirect</em> section too.</p>
+<form method="post" class="card form">
+  <h2>What arrived</h2>
+  <label>Sample
+    <select name="sample_id" id="sample_id">
+      <option value="new">➕ New sample record</option>
+      {% for s in samples %}<option value="{{ s.id }}" {% if form.get('sample_id')|string == s.id|string %}selected{% endif %}>{{ s.code }} — {{ s.name }} ({{ s.on_hand }} {{ s.unit }} on hand)</option>{% endfor %}
+    </select>
+  </label>
+  <fieldset id="new-sample">
+    <legend>New sample details</legend>
+    <div class="row">
+      <label>Sample code <input name="new_code" value="{{ form.get('new_code', '') }}" placeholder="{{ next_code }} (auto)"></label>
+      <label>Name / description * <input name="new_name" value="{{ form.get('new_name', '') }}"></label>
+    </div>
+    <div class="row">
+      <label>Category <input name="new_category" value="{{ form.get('new_category', '') }}" placeholder="e.g. Fabric, PCB, Packaging"></label>
+      <label>Vendor part / SKU # <input name="new_part_number" value="{{ form.get('new_part_number', '') }}"></label>
+    </div>
+    <div class="row">
+      <label>Unit <input name="new_unit" value="{{ form.get('new_unit', 'pcs') }}"></label>
+      <label>Storage location <input name="new_storage_location" value="{{ form.get('new_storage_location', '') }}" placeholder="e.g. Shelf B3"></label>
+    </div>
+    <label>Notes <textarea name="new_description" rows="2">{{ form.get('new_description', '') }}</textarea></label>
+  </fieldset>
+
+  <div class="row">
+    <label>Quantity * <input type="number" min="1" name="quantity" value="{{ form.get('quantity', '') }}" required></label>
+    <label>Date received * <input type="date" name="movement_date" value="{{ form.get('movement_date', today) }}" required></label>
+  </div>
+  <div class="row">
+    <label>Received from *
+      {% with field='party_id', required=True, placeholder='— vendor / customer —' %}{% include "_party_select.html" %}{% endwith %}
+      <small><a href="{{ url_for('main.party_new', next=url_for('main.receive')) }}">+ add a new vendor/customer</a></small>
+    </label>
+    <label>Reference (PO / invoice / request #) <input name="reference" value="{{ form.get('reference', '') }}"></label>
+  </div>
+  <div class="row">
+    <label>Carrier <input name="carrier" value="{{ form.get('carrier', '') }}" placeholder="DHL, FedEx, hand delivery…"></label>
+    <label>Inbound tracking # <input name="tracking_number" value="{{ form.get('tracking_number', '') }}"></label>
+  </div>
+  <label>Notes <textarea name="notes" rows="2">{{ form.get('notes', '') }}</textarea></label>
+
+  <details {% if form.get('redirect_to') %}open{% endif %}>
+    <summary><strong>Redirect</strong> — forwarding some or all of these straight on to someone else?</summary>
+    <div class="row">
+      <label>Redirect to
+        {% with field='redirect_to', required=False, placeholder='— not redirecting —' %}{% include "_party_select.html" %}{% endwith %}
+      </label>
+      <label>Quantity to redirect <input type="number" min="1" name="redirect_quantity" value="{{ form.get('redirect_quantity', '') }}" placeholder="all"></label>
+    </div>
+    <div class="row">
+      <label>Outbound carrier <input name="redirect_carrier" value="{{ form.get('redirect_carrier', '') }}"></label>
+      <label>Outbound tracking # <input name="redirect_tracking" value="{{ form.get('redirect_tracking', '') }}"></label>
+    </div>
+    <label>Redirect notes <textarea name="redirect_notes" rows="2">{{ form.get('redirect_notes', '') }}</textarea></label>
+  </details>
+
+  <div class="form-actions"><button class="btn btn-primary" type="submit">Record receipt</button></div>
+</form>
+<script>
+  const sel = document.getElementById('sample_id'), box = document.getElementById('new-sample');
+  const sync = () => { box.hidden = sel.value !== 'new'; };
+  sel.addEventListener('change', sync); sync();
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ sample.code }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ sample.code }} · {{ sample.name }}</h1>
+    <p class="muted">
+      {% if sample.category %}{{ sample.category }} · {% endif %}
+      {% if sample.part_number %}Part # {{ sample.part_number }} · {% endif %}
+      {% if sample.storage_location %}Stored at {{ sample.storage_location }} · {% endif %}
+      Created {{ sample.created_at }} by {{ sample.created_by }}
+    </p>
+  </div>
+  <div>
+    <a class="btn btn-primary" href="{{ url_for('main.receive', sample_id=sample.id) }}">Receive more</a>
+    <a class="btn" href="{{ url_for('main.movement_new', sample_id=sample.id, movement_type='SENT') }}">Send out</a>
+    <a class="btn" href="{{ url_for('main.movement_new', sample_id=sample.id, movement_type='REDIRECTED') }}">Redirect</a>
+    <a class="btn" href="{{ url_for('main.movement_new', sample_id=sample.id, movement_type='CONSUMED') }}">Other…</a>
+    <a class="btn" href="{{ url_for('main.sample_edit', sample_id=sample.id) }}">Edit</a>
+  </div>
+</div>
+{% if sample.description %}<p>{{ sample.description }}</p>{% endif %}
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">On hand</div><div class="stat-value">{{ stock.on_hand }} <small>{{ sample.unit }}</small></div></div>
+  <div class="stat"><div class="stat-label">Total in</div><div class="stat-value qty-in">{{ stock.qty_in }}</div></div>
+  <div class="stat"><div class="stat-label">Total out</div><div class="stat-value qty-out">{{ stock.qty_out }}</div></div>
+</div>
+
+<section class="card scroll">
+  <h2>Movement trail</h2>
+  {% with rows=trail, show_sample=False, show_balance=True %}{% include "_movement_table.html" %}{% endwith %}
+  {% set active = trail|rejectattr('0.voided')|list %}
+  {% if active %}
+  <details class="void-box">
+    <summary>Void an entry (mistakes are voided, never deleted)</summary>
+    <form method="post" class="row" action="{{ url_for('main.movement_void') }}" onsubmit="return confirm('Void this entry? It stays in the history but no longer counts toward stock.');">
+      <label>Entry
+        <select name="movement_id" required>{% for r, _ in active %}<option value="{{ r.id }}">#{{ r.id }} · {{ r.movement_date }} · {{ MOVEMENT_TYPES[r.movement_type][0] }} · {{ r.quantity }}</option>{% endfor %}</select>
+      </label>
+      <label>Reason * <input name="reason" required></label>
+      <div class="form-actions"><button class="btn btn-danger" type="submit">Void entry</button></div>
+    </form>
+  </details>
+  {% endif %}
+</section>
+
+<section class="card scroll">
+  <h2>Audit trail</h2>
+  {% with rows=audit %}{% include "_audit_table.html" %}{% endwith %}
+</section>
+{% endblock %}

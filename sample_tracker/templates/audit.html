@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Audit trail{% endblock %}
+{% block content %}
+<h1>Audit trail</h1>
+<p class="muted">Every create, edit and void, with who did it and when. Latest 500 entries.</p>
+<section class="card scroll">{% include "_audit_table.html" %}</section>
+{% endblock %}

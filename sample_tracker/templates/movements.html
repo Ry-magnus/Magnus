@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Movements{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>All movements</h1>
+  <a class="btn" href="{{ url_for('main.movements_csv', **args) }}">Export CSV</a>
+</div>
+<form class="filters card" method="get">
+  <input name="q" value="{{ args.get('q', '') }}" placeholder="Search code, name, ref, tracking, notes">
+  <select name="direction">
+    <option value="">In &amp; out</option>
+    <option value="in" {% if args.get('direction') == 'in' %}selected{% endif %}>Inbound only</option>
+    <option value="out" {% if args.get('direction') == 'out' %}selected{% endif %}>Outbound only</option>
+  </select>
+  <select name="movement_type">
+    <option value="">Any type</option>
+    {% for key, (label, _) in MOVEMENT_TYPES.items() %}<option value="{{ key }}" {% if args.get('movement_type') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <select name="party_id">
+    <option value="">Any party</option>
+    {% for p in parties %}<option value="{{ p.id }}" {% if args.get('party_id')|string == p.id|string %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+  </select>
+  <select name="sample_id">
+    <option value="">Any sample</option>
+    {% for s in samples %}<option value="{{ s.id }}" {% if args.get('sample_id')|string == s.id|string %}selected{% endif %}>{{ s.code }} — {{ s.name }}</option>{% endfor %}
+  </select>
+  <label class="inline">From <input type="date" name="date_from" value="{{ args.get('date_from', '') }}"></label>
+  <label class="inline">To <input type="date" name="date_to" value="{{ args.get('date_to', '') }}"></label>
+  <label class="inline"><input type="checkbox" name="include_voided" value="1" {% if args.get('include_voided') %}checked{% endif %}> include voided</label>
+  <button class="btn" type="submit">Filter</button>
+  <a href="{{ url_for('main.movements') }}">Reset</a>
+</form>
+<section class="card scroll">
+  {% with show_sample=True, show_balance=False %}{% include "_movement_table.html" %}{% endwith %}
+</section>
+{% endblock %}

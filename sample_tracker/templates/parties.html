@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Vendors & Customers{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Vendors &amp; customers</h1>
+  <a class="btn btn-primary" href="{{ url_for('main.party_new') }}">+ Add</a>
+</div>
+<section class="card scroll">
+<table>
+  <thead><tr><th>Name</th><th>Type</th><th>Contact</th><th class="num">Received from them</th><th class="num">Sent / redirected to them</th><th>Last activity</th></tr></thead>
+  <tbody>
+  {% for p in rows %}
+    <tr>
+      <td><a href="{{ url_for('main.party_detail', party_id=p.id) }}">{{ p.name }}</a></td>
+      <td><span class="badge">{{ p.party_type }}</span></td>
+      <td>{{ p.contact_person or '' }}{% if p.email %} <span class="muted">{{ p.email }}</span>{% endif %}</td>
+      <td class="num qty-in">{{ p.qty_from }}</td><td class="num qty-out">{{ p.qty_to }}</td><td>{{ p.last_activity or '' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">No vendors or customers yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</section>
+{% endblock %}

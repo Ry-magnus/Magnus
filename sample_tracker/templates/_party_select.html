@@ -1,0 +1,4 @@
+<select name="{{ field }}" {% if required %}required{% endif %}>
+  <option value="">{{ placeholder or '— select —' }}</option>
+  {% for p in parties %}<option value="{{ p.id }}" {% if form.get(field)|string == p.id|string %}selected{% endif %}>{{ p.name }} ({{ p.party_type }})</option>{% endfor %}
+</select>

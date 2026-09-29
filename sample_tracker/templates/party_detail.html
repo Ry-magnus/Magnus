@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ party.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ party.name }} <span class="badge">{{ party.party_type }}</span></h1>
+    <p class="muted">
+      {% if party.contact_person %}{{ party.contact_person }} · {% endif %}
+      {% if party.email %}{{ party.email }} · {% endif %}
+      {% if party.phone %}{{ party.phone }} · {% endif %}
+      {{ party.address or '' }}
+    </p>
+  </div>
+  <div>
+    <a class="btn" href="{{ url_for('main.movements_csv', party_id=party.id) }}">Export CSV</a>
+    <a class="btn" href="{{ url_for('main.party_edit', party_id=party.id) }}">Edit</a>
+  </div>
+</div>
+{% if party.notes %}<p>{{ party.notes }}</p>{% endif %}
+
+<section class="card scroll">
+  <h2>Samples exchanged</h2>
+  <table>
+    <thead><tr><th>Sample</th><th class="num">Received from {{ party.name }}</th><th class="num">Sent / redirected to {{ party.name }}</th></tr></thead>
+    <tbody>
+    {% for s in by_sample %}
+      <tr><td><a href="{{ url_for('main.sample_detail', sample_id=s.id) }}">{{ s.code }}</a> {{ s.name }}</td>
+          <td class="num qty-in">{{ s.qty_from }} <span class="muted">{{ s.unit }}</span></td>
+          <td class="num qty-out">{{ s.qty_to }} <span class="muted">{{ s.unit }}</span></td></tr>
+    {% else %}<tr><td colspan="3" class="muted">Nothing yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card scroll">
+  <h2>History</h2>
+  {% with rows=history, show_sample=True, show_balance=False %}{% include "_movement_table.html" %}{% endwith %}
+</section>
+{% endblock %}
